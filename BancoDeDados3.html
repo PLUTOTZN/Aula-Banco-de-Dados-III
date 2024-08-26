@@ -1,0 +1,68 @@
+1. Criando o Banco de Dados
+
+CREATE DATABASE LojaVirtual;
+USE LojaVirtual;
+
+2. Criando as Tabelas
+
+CREATE TABLE produtos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    preco DECIMAL(10, 2) NOT NULL,
+    estoque INT NOT NULL
+);
+
+Tabela clientes
+
+CREATE TABLE clientes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    telefone VARCHAR(15)
+);
+
+Tabela pedidos
+
+CREATE TABLE pedidos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente_id INT,
+    produto_id INT,
+    quantidade INT NOT NULL,
+    data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);
+
+3. Criando um Trigger
+
+DELIMITER $$
+
+CREATE TRIGGER atualizar_estoque_after_insert_pedido
+AFTER INSERT ON pedidos
+FOR EACH ROW
+BEGIN
+    UPDATE produtos
+    SET estoque = estoque - NEW.quantidade
+    WHERE id = NEW.produto_id;
+END$$
+
+DELIMITER ;
+
+4. Testando o Trigger
+Inserindo um Produto
+
+INSERT INTO produtos (nome, preco, estoque) VALUES ('Notebook', 3500.00, 10);
+
+Inserindo um Cliente
+
+INSERT INTO clientes (nome, email, telefone) VALUES ('João Silva', 'joao@example.com', '123456789');
+
+Inserindo um Pedido (e ativando o trigger)
+
+INSERT INTO pedidos (cliente_id, produto_id, quantidade) VALUES (1, 1, 2);
+
+Verificando o Estoque Atualizado
+
+SELECT * FROM produtos WHERE id = 1;
+
+
